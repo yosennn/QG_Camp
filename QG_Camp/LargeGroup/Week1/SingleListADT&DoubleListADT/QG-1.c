@@ -27,6 +27,7 @@ void SingleListPrint(struct SingleListNode *head);
 void SingleListAdd(struct SingleListNode *head);
 void SingleListFree(struct SingleListNode *head);
 void SingleListDelete(struct SingleListNode *head);
+void SingleListExchange(struct SingleListNode *head);
 
 void DoubleListADT(void);
 struct DoubleListNode *DoubleListCreate(void);
@@ -40,7 +41,9 @@ void DoubleListDelete(struct DoubleListNode *head);
 int main()
 {
     printf("QG训练营大组第一次作业\n"
-        "作者：王宥程   组别：前端\n");
+        "作者：王宥程   组别：前端\n"
+        "完成情况：\n"
+        "单、双链表ADT（必做）\n");
 
     menu();
 
@@ -99,8 +102,9 @@ void SingleListADT(void)
     while(1)
     {
         printf("1   查看链表\n"
-            "2   增加\n"
+            "2  增加\n"
             "3  删除\n"
+            "4  奇偶节点交换\n"
             "other  回到上一级\n"
             "请输入一个数字\n");
             int k=0;
@@ -117,6 +121,9 @@ void SingleListADT(void)
                     break;
                 case 3:
                     SingleListDelete(head);
+                    break;
+                case 4:
+                    SingleListExchange(head);
                     break;
 
                 default:
@@ -225,6 +232,20 @@ void SingleListDelete(struct SingleListNode *head)
         p1=p2,p2=p2->next;
     }
 
+    return;
+}
+
+//选做功能——奇偶节点交换
+void SingleListExchange(struct SingleListNode *head)
+{
+    int n;
+    struct SingleListNode *p=head->next;
+    for(;p!=NULL&&p->next!=NULL;p=p->next->next)
+    {
+        n=p->num;
+        p->num=p->next->num;
+        p->next->num=n;
+    }
     return;
 }
 
