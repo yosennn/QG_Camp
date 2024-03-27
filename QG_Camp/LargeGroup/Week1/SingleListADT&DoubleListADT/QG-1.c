@@ -28,6 +28,7 @@ void SingleListAdd(struct SingleListNode *head);
 void SingleListFree(struct SingleListNode *head);
 void SingleListDelete(struct SingleListNode *head);
 void SingleListExchange(struct SingleListNode *head);
+struct SingleListNode *SingleListMid(struct SingleListNode *head);
 
 void DoubleListADT(void);
 struct DoubleListNode *DoubleListCreate(void);
@@ -56,7 +57,7 @@ void menu()
     while (1)
     {
         fenge(40,'=');
-        printf("1   单链表ADT\n"
+        printf("1   单链表ADT & 选做功能1+2\n"
             "2  双链表ADT\n"
             "other  退出"
             "请输入一个数字进行选择\n");
@@ -101,15 +102,19 @@ void SingleListADT(void)
 
     while(1)
     {
-        printf("1   查看链表\n"
+        printf("\n"
+            "1   查看链表\n"
             "2  增加\n"
             "3  删除\n"
             "4  奇偶节点交换\n"
+            "5  该链表寻找中点\n"
             "other  回到上一级\n"
             "请输入一个数字\n");
             int k=0;
+            struct SingleListNode *pMid;//查找中点时要用到的指针
             scanf("%d",&k);
             getchar();
+            printf("\n");
             
             switch (k)
             {
@@ -125,8 +130,16 @@ void SingleListADT(void)
                 case 4:
                     SingleListExchange(head);
                     break;
+                case 5:
+                    pMid=SingleListMid(head);
+                    if(pMid==NULL)
+                        printf("节点数为偶数，没有中点\n");
+                    else
+                        printf("中点为 %d\n",pMid->num);
+                    break;
 
                 default:
+                SingleListFree(head);
                     return;
             }
     }
@@ -169,13 +182,14 @@ struct SingleListNode *SingleListCreate(void)
 void SingleListPrint(struct SingleListNode *head)
 {
     head=head->next;//跳过头节点
-    printf("NULL");
+    printf("\n链表为："
+        "NULL");
     while(head!=NULL)
     {
         printf("->%d",head->num);
         head=head->next;
     }
-    printf("\n");
+    printf("\n\n");
     return;
 }
 
@@ -254,7 +268,7 @@ void SingleListExchange(struct SingleListNode *head)
 void DoubleListADT(void)
 {
     fenge(40,'=');
-    struct DoubleListNode *head=DoubleListCreate();
+    struct DoubleListNode *head=DoubleListCreate();//创建链表
     printf("双向链表已创建（为方便起见已赋初值），内容为\n");
     DoubleListPrint(head);
 
@@ -282,6 +296,7 @@ void DoubleListADT(void)
                     break;
 
                 default:
+                    DoubleListFree(head);
                     return;
             }
     }
@@ -318,13 +333,14 @@ struct DoubleListNode *DoubleListCreate(void)
 void DoubleListPrint(struct DoubleListNode *head)
 {
     head=head->next;//跳过头节点
-    printf("NULL");
+    printf("\n链表为：\n"
+        "NULL");
     while(head->next!=NULL)
     {
         printf("->%d",head->num);
         head=head->next;
     }
-    printf("->NULL\n");
+    printf("->NULL\n\n");
     return;
 }
 
@@ -384,4 +400,16 @@ void DoubleListDelete(struct DoubleListNode *head)
     }
 
     return;
+}
+
+//查找单链表的中点，若成功，则返回指向中点的链表，否则就返回空指针
+struct SingleListNode *SingleListMid(struct SingleListNode *head)
+{
+    struct SingleListNode *p1=head->next,*p2=p1;//跳过头节点
+    for(;p2->next!=NULL&&p2->next->next!=NULL
+        ;p1=p1->next,p2=p2->next->next) ;//p1走一步，p2走两步
+    if(p2->next==NULL)
+        return p1;
+    else
+        return NULL;
 }
