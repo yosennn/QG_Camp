@@ -3,15 +3,17 @@
 
 int inputCheck(char str[101]);
 int inputCheckChar(char str[101]);
-int stringCheck(char *p);
-int numberCheck(char *p);
+int structCheck(char *p);
+int ItemizationCheck(char **p);
+int numberCheck(char ch);
+int structCheck2(char *p);
 
 
 
 int main()
 {
     char str[101]={0};
-    printf("此计算器只完成了输入检测部分，且没有考虑()，请忽视下面的提示中的()\n");
+    printf("此计算器只完成了输入检测部分，且复杂一些的有()的表达式过不了检测\n");
     printf("请输入表达式\n"
         "提示：只能包括+-*/()和数字，且不得超过100个字符\n");
     scanf("%s",str);
@@ -26,12 +28,13 @@ int main()
     return 0;
 }
 
-//输入检测
+//输入检测,合法返回1，否则返回0
 int inputCheck(char str[101])
 {
     char *p=str;//p指向str的首元素
 
-    inputCheckChar(str);//判断是否有非法字符
+    if(inputCheckChar(str) == 0)
+        return 0;//判断是否有非法字符
 
     if(*p == '-'){
         if(*(++p) == '-')//判断p的下一位字符，同时让p自加
@@ -40,7 +43,8 @@ int inputCheck(char str[101])
         }
     }
 
-    if(stringCheck(p) == 1)
+    //判断结构是否合法
+    if(structCheck(p) == 1)
         return 1;
     else 
         return 0;
@@ -49,6 +53,7 @@ int inputCheck(char str[101])
 //判断一个字符数组中是否有非法字符，有则返回0，否则返回1
 int inputCheckChar(char str[101])
 {
+    int num=0;
     char *p=str;
     for(;*p != 0;p++)
     {
@@ -63,40 +68,101 @@ int inputCheckChar(char str[101])
                 printf("报错：出现非法字符 %c\n",*p);
                 return 0;
             }
-
+        if(*p == '(')
+            num++;
+        else if (*p == ')')
+            num--;
     }
+    if(num != 0){
+        printf("左右括号的数量不相同\n");
+        return 0;
+    }
+
+
     return 1;
 }
 
-//判断字符串内是否是数字、运算符相间的结构，是则返回1，否则0
-int stringCheck(char *p)
+//递归判断表达式内是否是项、运算符相间的结构。本身判断p为数字，p的下一位为运算符，是则返回1，否则0
+int structCheck(char *p)
 {
-    if(numberCheck(p) == 1 && *(p+1) == 0)
-    {//p指向最后一个数字且后一个字符为0，读到str有效字符的末尾，意味着中途没有遇到return 0的情况
+    int isItemization=ItemizationCheck(&p);//判断p是否指向项
+    if(isItemization && *(p+1) == 0)
+    {//p指向最后一个项且后一个字符为0，读到str有效字符的末尾，意味着中途没有遇到return 0的情况
         return 1;
     }
-    else if(numberCheck(p) == 1)
+    else if(isItemization)
     {
-        if(numberCheck(p+1) == 1)
-        {
-            printf("报错：出现了两个数字连在一起的情况\n");
-            return 0;//p指向数字，且p的下一个也为数字，非法的结构
-        }
-        else//表示p通过了测试
-            return stringCheck(p+2);
+        return structCheck(p+2);//递归自身
+    }
+    else if(*p == 0)
+    {
+        return 1;
     }
     else
     {
-        printf("报错：出现了两个字符串连相邻的情况\n");
+        printf("报错：出现了两个运算符连相邻的情况\n");
         return 0;
     }
 }
 
-//判断一个字符是否是数字,是则返回1，否则0
-int numberCheck(char *p)
+//判断字符（串）是否是“项”,是则返回1，否则0。同时使p指向该“项”的最后一位（左右括号则为右括号）
+int ItemizationCheck(char **ppChar)
 {
-    if(*p>=48 && *p<=57)
+    if (numberCheck(**ppChar))//如果*ppChar指向数字，说明ppChar指向的“项”为纯数字
+    {
+        while(numberCheck(*(*ppChar+1)) == 1)//直到p指向最后一位
+            *ppChar=*ppChar+1;
+        return 1;
+    }
+    else if(**ppChar == '(')//如果*ppchar指向 '('，说明ppchar指向的“项”是一个被括号包起来的完整表达式
+    {
+        if(structCheck2(*ppChar+1) == 1)
+        {
+            
+            *ppChar=*ppChar+1;
+            while (**ppChar != ')')//直到p指向最后一位
+                *ppChar=*ppChar+1;
+            return 1;
+        }
+    }
+    else
+    {
+        printf("恭喜你整出bug了\n"
+            "此bug出现在 函数int numberCheck(char **ppChar)下\n"
+            "请保留测试数据进行debug\n");
+    }
+}
+
+//判断一个字符是否是数字,是则返回1，否则0。很简单，不会出bug的
+int numberCheck(char ch)
+{
+    if(ch>=48 && ch<=57)
         return 1;
     else
         return 0;
+}
+
+//递归判断项内是否是项、运算符相间的结构。实际上是 int structCheck(char *p) 的复制
+int structCheck2(char *p)
+{
+    int isItemization=ItemizationCheck(&p);
+    if(isItemization && *(p+1) == ')')
+    {//p指向最后一个项且后一个字符为 )，读到项的末尾，意味着中途没有遇到return 0的情况
+        return 1;
+    }
+    else if(isItemization)
+    {
+        return structCheck2(p+2);
+    }
+    else if(*p == 0)
+    {
+            printf("恭喜你整出bug了\n"
+        "此bug出现在 函数int structCheck2(char *p)下\n"
+        "请保留测试数据进行debug\n");
+    }
+    else
+    {
+        printf("报错：出现了两个运算符连相邻的情况\n");
+        return 0;
+    }
 }
